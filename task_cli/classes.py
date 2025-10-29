@@ -1,5 +1,5 @@
 import dataclasses
-import datetime
+from datetime import datetime
 from json import JSONEncoder
 
 
@@ -9,7 +9,7 @@ class Task:
     task_id: int = dataclasses.field(default=1)
     status: str = dataclasses.field(default="todo")
     created_at: str = dataclasses.field(
-        default_factory=lambda: (str(datetime.datetime.now().replace(microsecond=0)))
+        default_factory=lambda: (str(datetime.now().replace(microsecond=0)))
     )
     updated_at: str = dataclasses.field(default="")
 
@@ -22,7 +22,7 @@ class Task:
         self._update_time()
 
     def _update_time(self):
-        self.updated_at = str(datetime.datetime.now().replace(microsecond=0))
+        self.updated_at = str(datetime.now().replace(microsecond=0))
 
     def __post_init__(self):
         if not self.updated_at:
@@ -64,12 +64,12 @@ class TaskManager(Singleton):
 
     def update(self, task_id, new_description):
         if task_id not in self.tasks:
-            pass
+            raise TaskNotFoundError(f"Задачи {task_id} не существует")
         self.tasks[task_id].update_description(new_description)
 
     def delete(self, task_id):
         if task_id not in self.tasks:
-            pass
+            raise TaskNotFoundError(f"Задачи {task_id} не существует")
         else:
             del self.tasks[task_id]
 
@@ -84,7 +84,7 @@ class TaskManager(Singleton):
 
     def change_status(self, task_id, status):
         if task_id not in self.tasks:
-            pass
+            raise TaskNotFoundError(f"Задачи {task_id} не существует")
         self.tasks[task_id].change_status(status)
 
 
@@ -93,3 +93,7 @@ class DataclassEncoder(JSONEncoder):
         if hasattr(o, "__json__"):
             return o.__json__()
         return super().default(o)
+
+
+class TaskNotFoundError(Exception):
+    pass
