@@ -1,11 +1,18 @@
+# Виртуальное окружение
 .venv/
 env/
 venv/
-__pycache__/
+task_cli/__pycache__/
 *.pyc
 *.pyo
 *.pyd
-storage/
-*.json
+# Логи и временные файлы
+*.log
+*.tmp
+# IDE и редакторы
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
+
+task_cli/storage/*.json
