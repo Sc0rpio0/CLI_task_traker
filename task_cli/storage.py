@@ -7,7 +7,7 @@ STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 TASKS_FILE = STORAGE_DIR / "tasks.json"
 
 
-def load_task_manager():
+def load_task_manager() -> TaskManager:
     try:
         with TASKS_FILE.open("r", encoding="UTF-8") as file:
             return TaskManager(load(file))
@@ -15,6 +15,6 @@ def load_task_manager():
         return TaskManager()
 
 
-def save(tracker):
+def save(tracker) -> None:
     with TASKS_FILE.open("w", encoding="UTF-8") as file:
-        dump(tracker, file, cls=DataclassEncoder, ensure_ascii=False)
+        dump(tracker, file, cls=DataclassEncoder, ensure_ascii=False, indent=2)

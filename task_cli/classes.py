@@ -6,7 +6,7 @@ from json import JSONEncoder
 @dataclasses.dataclass()
 class Task:
     description: str
-    task_id: int = dataclasses.field(default=1)
+    task_id: str
     status: str = dataclasses.field(default="todo")
     created_at: str = dataclasses.field(
         default_factory=lambda: (str(datetime.now().replace(microsecond=0)))
@@ -15,13 +15,13 @@ class Task:
 
     def change_status(self, status):
         self.status = status
-        self._update_time()
+        self._touch()
 
     def update_description(self, new_description):
         self.description = new_description
-        self._update_time()
+        self._touch()
 
-    def _update_time(self):
+    def _touch(self):
         self.updated_at = str(datetime.now().replace(microsecond=0))
 
     def __post_init__(self):
@@ -34,11 +34,17 @@ class Task:
 
 class Singleton:
     _instance = None
+    _initialazed = False
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
+
+    def __init__(self) -> None:
+        if self._initialazed:
+            return
+        self._initialazed = True
 
 
 @dataclasses.dataclass
@@ -54,42 +60,41 @@ class TaskManager(Singleton):
         return self.tasks
 
     def add(self, description):
-        task = Task(description)
-        while True:
-            if str(task.task_id) in self.tasks:
-                task.task_id += 1
-            else:
-                break
+        task = Task(description, task_id=self._get_id())
         self.tasks[task.task_id] = task
 
     def update(self, task_id, new_description):
-        if task_id not in self.tasks:
-            raise TaskNotFoundError(f"Задачи {task_id} не существует")
-        self.tasks[task_id].update_description(new_description)
+        self._get_task(task_id).update_description(new_description)
 
     def delete(self, task_id):
-        if task_id not in self.tasks:
-            raise TaskNotFoundError(f"Задачи {task_id} не существует")
-        else:
-            del self.tasks[task_id]
-
-    def show(self, status):
-        tasks = dict(sorted(self.tasks.items()))
-        for x in tasks:
-            if status and tasks[x].status != status:
-                continue
-            print(
-                f"Задача {x}: {tasks[x].description}, статус: {tasks[x].status}, создана {tasks[x].created_at}, последнее обновление {tasks[x].updated_at}"
-            )
+        self.tasks.pop(self._get_task(task_id).task_id)
 
     def change_status(self, task_id, status):
-        if task_id not in self.tasks:
+        self._get_task(task_id).change_status(status)
+
+    def _get_task(self, task_id: str):
+        try:
+            return self.tasks[task_id]
+        except KeyError:
             raise TaskNotFoundError(f"Задачи {task_id} не существует")
-        self.tasks[task_id].change_status(status)
+
+    def get_list(self, status):
+        tasks = dict(sorted(self.tasks.items()))
+        return [
+            f"Задача {x}: {tasks[x].description}, статус: {tasks[x].status}, создана {tasks[x].created_at}, последнее обновление {tasks[x].updated_at}"
+            for x in tasks
+            if not status or tasks[x].status == status
+        ]
+
+    def _get_id(self):
+        task_id = 1
+        while str(task_id) in self.tasks:
+            task_id += 1
+        return str(task_id)
 
 
 class DataclassEncoder(JSONEncoder):
-    def default(self, o):
+    def default(self, o: TaskManager):
         if hasattr(o, "__json__"):
             return o.__json__()
         return super().default(o)
