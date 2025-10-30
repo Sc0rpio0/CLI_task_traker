@@ -78,6 +78,12 @@ class TaskManager(Singleton):
         except KeyError:
             raise TaskNotFoundError(f"Задачи {task_id} не существует")
 
+    def _get_id(self):
+        task_id = 1
+        while str(task_id) in self.tasks:
+            task_id += 1
+        return str(task_id)
+
     def get_list(self, status):
         tasks = dict(sorted(self.tasks.items()))
         return [
@@ -85,12 +91,6 @@ class TaskManager(Singleton):
             for x in tasks
             if not status or tasks[x].status == status
         ]
-
-    def _get_id(self):
-        task_id = 1
-        while str(task_id) in self.tasks:
-            task_id += 1
-        return str(task_id)
 
 
 class DataclassEncoder(JSONEncoder):

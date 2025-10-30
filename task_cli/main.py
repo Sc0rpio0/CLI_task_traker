@@ -1,6 +1,6 @@
 import typer
-from storage import save, load_task_manager
-from classes import TaskNotFoundError
+from .storage import save, load_task_manager
+from .classes import TaskNotFoundError
 
 app = typer.Typer()
 

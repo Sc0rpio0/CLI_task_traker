@@ -1,6 +1,6 @@
 from pathlib import Path
 from json import load, dump, JSONDecodeError
-from classes import TaskManager, DataclassEncoder
+from .classes import TaskManager, DataclassEncoder
 
 STORAGE_DIR = Path(__file__).parent / "storage"
 STORAGE_DIR.mkdir(parents=True, exist_ok=True)
