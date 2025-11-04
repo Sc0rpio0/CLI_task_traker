@@ -2,6 +2,8 @@ Simple CLI task-tracker.
 
 You can create and change your tasks.
 
+Project on GitHub : https://roadmap.sh/projects/task-tracker
+
 ### Command list:
 - **add** <description> - add new task
 - **delete** <task_id> - delete task
